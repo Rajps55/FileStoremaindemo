@@ -6,12 +6,13 @@ import re
 import asyncio
 from pyrogram import filters
 from pyrogram.enums import ChatMemberStatus
-from config import FORCESUB_CHANNEL, FORCESUB_CHANNEL2, FORCESUB_CHANNEL3, ADMINS
+from config import FORCE_SUB_CHANNEL, FORCE_SUB_CHANNEL2, ADMINS
 from pyrogram.errors.exceptions.bad_request_400 import UserNotParticipant
 from pyrogram.errors import FloodWait
 
+
 async def is_subscribed(filter, client, update):
-    if not (FORCESUB_CHANNEL or FORCESUB_CHANNEL2 or FORCESUB_CHANNEL3):
+    if not (FORCE_SUB_CHANNEL or FORCE_SUB_CHANNEL2):
         return True
 
     user_id = update.from_user.id
@@ -21,7 +22,7 @@ async def is_subscribed(filter, client, update):
 
     member_status = ChatMemberStatus.OWNER, ChatMemberStatus.ADMINISTRATOR, ChatMemberStatus.MEMBER
 
-    for channel_id in [FORCESUB_CHANNEL, FORCESUB_CHANNEL2, FORCESUB_CHANNEL3]:
+    for channel_id in [FORCE_SUB_CHANNEL, FORCE_SUB_CHANNEL2]:
         if not channel_id:
             continue
 
@@ -35,11 +36,13 @@ async def is_subscribed(filter, client, update):
 
     return True
 
+
 async def encode(string):
     string_bytes = string.encode("ascii")
     base64_bytes = base64.urlsafe_b64encode(string_bytes)
     base64_string = (base64_bytes.decode("ascii")).strip("=")
     return base64_string
+
 
 async def decode(base64_string):
     base64_string = base64_string.strip("=")
@@ -48,11 +51,12 @@ async def decode(base64_string):
     string = string_bytes.decode("ascii")
     return string
 
+
 async def get_messages(client, message_ids):
     messages = []
     total_messages = 0
     while total_messages != len(message_ids):
-        temb_ids = message_ids[total_messages:total_messages+200]
+        temb_ids = message_ids[total_messages:total_messages + 200]
         try:
             msgs = await client.get_messages(
                 chat_id=client.db_channel.id,
@@ -64,11 +68,13 @@ async def get_messages(client, message_ids):
                 chat_id=client.db_channel.id,
                 message_ids=temb_ids
             )
-        except:
+        except Exception as e:
+            print(f"An error occurred: {e}")
             pass
         total_messages += len(temb_ids)
         messages.extend(msgs)
     return messages
+
 
 async def get_message_id(client, message):
     if message.forward_from_chat:
@@ -79,7 +85,7 @@ async def get_message_id(client, message):
     elif message.forward_sender_name:
         return 0
     elif message.text:
-        pattern = "https://t.me/(?:c/)?(.*)/(\d+)"
+        pattern = r"https://t.me/(?:c/)?(.*)/(\d+)"
         matches = re.match(pattern, message.text)
         if not matches:
             return 0
@@ -91,8 +97,8 @@ async def get_message_id(client, message):
         else:
             if channel_id == client.db_channel.username:
                 return msg_id
-    else:
-        return 0
+    return 0
+
 
 def get_readable_time(seconds: int) -> str:
     count = 0
@@ -114,5 +120,6 @@ def get_readable_time(seconds: int) -> str:
     time_list.reverse()
     up_time += ":".join(time_list)
     return up_time
+
 
 subscribed = filters.create(is_subscribed)
