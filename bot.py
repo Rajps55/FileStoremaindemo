@@ -16,8 +16,8 @@ name ="""
 """
 
 class Bot(Client):
-    def init(self):
-        super().init(
+    def __init__(self):
+        super().__init__(
             name="Bot",
             api_hash=API_HASH,
             api_id=APP_ID,
@@ -63,7 +63,7 @@ class Bot(Client):
         try:
             db_channel = await self.get_chat(CHANNEL_ID)
             self.db_channel = db_channel
-            test = await self.send_message(chat_id = db_channel.id, text = "Test Message")
+            test = await self.send_message(chat_id=db_channel.id, text="Test Message")
             await test.delete()
         except Exception as e:
             self.LOGGER(name).warning(e)
@@ -73,7 +73,7 @@ class Bot(Client):
 
         self.set_parse_mode(ParseMode.HTML)
         self.LOGGER(name).info(f"Bot Running..!\n\nCreated by \nhttps://t.me/weebs_support")
-        self.LOGGER(name).info(f""" \n\n       
+        self.LOGGER(name).info(r""" \n\n       
                                                    
                   
                                  
